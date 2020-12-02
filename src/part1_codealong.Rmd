@@ -1,0 +1,74 @@
+---
+title: "part1_codealong"
+author: "Mukta Kelkar"
+date: "12/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GGally)
+library(palmerpenguins)
+library(stargazer)
+```
+
+```{r}
+# Use GGally
+penguins %>% 
+  ggpairs()
+```
+
+```{r}
+# pick 5 variables to include in GGally to make the graph easier to read
+penguins %>% 
+  select(species, bill_length_mm:body_mass_g) %>% 
+  ggpairs(aes(color = species)) # make each species a different color
+```
+
+## Build a few different models
+
+Penguin mass will always be the dependent variable, but we'll use different predictor variables
+
+```{r}
+lm1 <- lm(body_mass_g ~ flipper_length_mm + species, data = penguins)
+
+lm2 <- lm(body_mass_g ~ flipper_length_mm + species + sex, data = penguins)
+
+lm3 <- lm(body_mass_g ~ flipper_length_mm + species + sex + bill_length_mm, data = penguins)
+
+lm4 <- lm(body_mass_g ~ flipper_length_mm + species + sex + bill_length_mm + bill_length_mm + island, data = penguins)
+```
+
+## Find the AIC value for each model
+```{r}
+AIC(lm1)
+AIC(lm2)
+AIC(lm3) # Lowest AIC value
+AIC(lm4)
+```
+
+## Use stargazer package for a table with multiple model outputs
+
+Add `results = 'asis'` if I want to knit this document into an .html, since `stargazer` produces its own .html code
+```{r, results = 'asis'}
+stargazer(lm1, lm3, lm4, type = "html")
+```
+
+## Omitted variable bias
+
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = bill_depth_mm)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+```
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm,
+                            y = bill_depth_mm,
+                            group = species)) +
+  geom_point(aes(color = species)) +
+  geom_smooth(method = "lm")
+```
+
+ 
